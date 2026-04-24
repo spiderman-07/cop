@@ -1,26 +1,32 @@
 gram = {
-    "S": ["S+S", "S*S", "S-S", "(S)", "id"]
+    "S": ["(L)", "a"],
+    "L": ["L,S", "S"]
 }
-
 start = "S"
-inp = "(id+id)$"
+inp = "((a,a),(a,a))$"
 stack = "$"
 
-print(f'{"Stack": <15}' + "|" + f'{"Input Buffer": <15}' + "|" + 'Parsing Action')
-print(f'{"-":-<50}')
+print(f'{"Stack":<20}|{"Input Buffer":<20}|Parsing Action')
+print("-"*60)
 
 while True:
-    for i in range(len(gram[start])):
-        if gram[start][i] in stack:
-            stack = stack.replace(gram[start][i], start)
-            print(f'{stack: <15}' + "|" + f'{inp: <15}' + "|" + f'Reduce > {gram[start][i]}')
-    if len(inp) > 1:
+    reduced = False
+    for lhs in gram:
+        for rhs in gram[lhs]:
+            if rhs in stack:
+                stack = stack.replace(rhs, lhs, 1)
+                print(f'{stack:<20}|{inp:<20}|Reduce {lhs}->{rhs}')
+                reduced = True
+                break
+        if reduced:
+            break
+    if not reduced:
         stack += inp[0]
         inp = inp[1:]
-        print(f'{stack: <15}' + "|" + f'{inp: <15}' + "|" + 'Shift')
-    if stack == ("$" + start):
-        if inp == '$':
-            print(f'{stack: <15}' + "|" + f'{inp: <15}' + "|" + 'Accepted')
-        else:
-            print(f'{stack: <15}' + "|" + f'{inp: <15}' + "|" + 'Rejected')
+        print(f'{stack:<20}|{inp:<20}|Shift')
+    if stack == "$S" and inp == "$":
+        print(f'{stack:<20}|{inp:<20}|Accepted')
+        break
+    if inp == "" and not reduced:
+        print(f'{stack:<20}|{inp:<20}|Rejected')
         break
